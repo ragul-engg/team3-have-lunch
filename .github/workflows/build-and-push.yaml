@@ -1,0 +1,38 @@
+name: "Build and Push"
+
+on:
+  push: 
+    - main
+  
+jobs:
+  build-frontend:
+    name: "Build Frontend"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout Source" 
+        uses: actions/checkout@v4
+
+  build-backend:
+    name: "Build Backend"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Checkout Source" 
+        uses: actions/checkout@v4
+
+      - name: "Setup .NET"
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.100'
+      
+      - name: "Restore Packages"
+        run: dotnet restore backend/HaveLunch.sln
+
+      - name: "Build Source"
+        run: dotnet build backend/HaveLunch.sln
+
+      - name: "Run Tests"
+        run: dotnet test backend/HaveLunch.Tests/HaveLunch.Tests.csproj
+
+      - name: "Publish Docker Image"
+        run: dotnet publish backend/HaveLunch/HaveLunch.csproj --configuration Release --no-build --no-restore /t:PublishContainer
+
